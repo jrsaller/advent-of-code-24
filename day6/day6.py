@@ -6,7 +6,7 @@ EAST = 2
 SOUTH = 3
 WEST = 4
 
-lines = shared.read_file("test_source.txt")
+lines = shared.read_file("source.txt")
 
 def on_map(lines, pos):
     y,x = pos
@@ -24,12 +24,14 @@ vd = [["." for _ in range(len(lines[0]))] for _ in range(len(lines))]
 loopstarters = 0
 print(visited)
 
+start_pos = (-1,-1)
 pos= (-1,-1)
 face = NORTH
 
 for i in range(len(lines)):
     blocks.append([match.start() for match in re.finditer("#", lines[i])])
     if "^" in lines[i]:
+        start_pos = (i, lines[i].find("^"))
         pos = (i, lines[i].find("^"))
 
 print(blocks)
@@ -38,20 +40,46 @@ print(blocks)
 while on_map(lines, pos):
     y = pos[0]
     x = pos[1]
-    newpos = False
     if x not in visited[y]:
         visited[y].append(x)
         vd[y][x] = face
+    
+    if face == NORTH:
+        if start_pos == (y-1,x):
+            break
+        for p in range(x,len(lines[y])):
+            if p in visited[y] and vd[y][p] == EAST:
+                print(y,x)
+                loopstarters += 1
+                break
+    elif face == EAST:
+        if start_pos == (y,x+1): 
+            break
+        for p in range(y,len(lines)):
+            if x in visited[p] and vd[p][x] == SOUTH:
+                print(y,x)
+                loopstarters += 1
+                break
+
+    elif face == SOUTH:
+        if start_pos == (y+1,x): 
+            break
+        for p in range(x,0,-1):
+            if p in visited[y] and vd[y][p] == WEST:
+                print(y,x)
+                loopstarters += 1
+                break
+
+    elif face == WEST:
+        if start_pos == (y,x-1): 
+            break
+        for p in range(y,0,-1):
+            if x in visited[p] and vd[p][x] == NORTH:
+                print(y,x)
+                loopstarters += 1
+                break
     else:
-        od = vd[y][x]
-        if face == NORTH and od == EAST:
-            loopstarters+=1
-        elif face == EAST and od == SOUTH:
-            loopstarters+=1
-        elif face == SOUTH and od == WEST:
-            loopstarters+=1
-        elif face == WEST and od == NORTH:
-            loopstarters+=1
+        print("Something is wrong")
         
     # check y-1, x
     if face == NORTH:
